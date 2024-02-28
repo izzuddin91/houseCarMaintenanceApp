@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "97441375090",
+    "project_id": "housecarmaintenance",
+    "storage_bucket": "housecarmaintenance.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97441375090:android:4fac37eeba4f56c5dc33eb",
+        "android_client_info": {
+          "package_name": "com.izzuddin.iz_properties"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97441375090-81b2u24tmvgdtadjba5hof6230gl2am5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApuLST2Rl4zZgwmEBOHY0VgvGGQG5navw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97441375090-81b2u24tmvgdtadjba5hof6230gl2am5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
