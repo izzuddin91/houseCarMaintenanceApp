@@ -40,6 +40,7 @@ dependencies:
   firebase_core: ^2.24.2
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
+  date_picker_plus: ^2.1.0
 
 dev_dependencies:
   flutter_test:

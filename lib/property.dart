@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:iz_properties/property_add_logs.dart';
 
 import 'bloc/counter_bloc.dart';
 import 'package:bloc/bloc.dart';
@@ -200,8 +201,11 @@ class _PropertyPageState extends State<PropertyPage> {
                 icon: const Icon(Icons.add),
                 tooltip: 'Show Snackbar',
                 onPressed: () {
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //     const SnackBar(content: Text('This is a snackbar')));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) =>
+                              PropertyAddLogs(houseId: widget.houseId))));
                 },
               )
             ],
@@ -232,20 +236,8 @@ class _PropertyPageState extends State<PropertyPage> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: ((context) =>
-                                    //             const PropertyPage())));
-                                  },
-                                  child:
-                                      // ListTile(
-                                      //   leading: Text(formatted),
-                                      //   title: Text(client['notes']),
-                                      //   trailing: Text(client['total'].toString()),
-                                      // )
-                                      Container(
+                                  onTap: () {},
+                                  child: Container(
                                     margin: const EdgeInsets.all(10.0),
                                     padding: const EdgeInsets.all(10.0),
                                     decoration: BoxDecoration(
