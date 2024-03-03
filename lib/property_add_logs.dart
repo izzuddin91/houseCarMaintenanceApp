@@ -86,12 +86,6 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: ElevatedButton(
                     onPressed: () async {
-                      print('test data');
-                      print(controller1.text);
-                      print(controller2.text);
-                      print(selectedDate);
-                      print(widget.houseId);
-
                       if (_formKey.currentState!.validate()) {
                         print('valied');
                         // try push to firebase
