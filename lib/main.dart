@@ -92,6 +92,9 @@ class _LoginPageState extends State<LoginPage> {
                     controller: usernameController,
                   ),
                   TextFormField(
+                    obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
                     decoration: InputDecoration(labelText: "password"),
                     controller: passwordController,
                   ),

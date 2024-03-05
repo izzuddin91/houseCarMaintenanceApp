@@ -87,7 +87,7 @@ class _PropertyPageState extends State<PropertyPage> {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
           return AlertDialog(
-            title: Text('${state.year} / ${state.month}'),
+            title: Text('Select month / year'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: [
@@ -177,18 +177,20 @@ class _PropertyPageState extends State<PropertyPage> {
           greaterThanDate = '${state.year}-12-01';
           lessThanDate = '${state.year + 1}-01-01';
         } else {
-          lessThanDate =
-              '${(state.year)}-${monthListInteger[(state.month) + 1]}-01';
           greaterThanDate =
-              '${state.year}-${monthListInteger[(state.month == 12 ? 11 : state.month)]}-01';
+              '${state.year}-${((state.month) == 12 ? 11 : state.month) < 10 ? '0${state.month}' : state.month}-01';
+          lessThanDate =
+              '${(state.year)}-${((state.month + 1) < 10 ? '0${state.month + 1}' : state.month + 1)}-01';
         }
+
         print('xx');
+        print(state.month);
+
         print(greaterThanDate);
         print(lessThanDate);
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-                'House Logs: ${state.month == 0 ? '1' : state.month} /  ${state.year}'),
+            title: Text('House Logs'),
             actions: <Widget>[
               IconButton(
                 icon: const Icon(Icons.calendar_month),

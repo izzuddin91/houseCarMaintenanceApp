@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:gif_view/gif_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -15,12 +16,14 @@ class PropertyAddLogs extends StatefulWidget {
 }
 
 class _PropertyAddLogsState extends State<PropertyAddLogs> {
+  final controller = GifController();
   File _selectedImage = new File('');
   final _formKey = GlobalKey<FormState>();
   DateTime selectedDate = new DateTime.now();
   TextEditingController controller1 = TextEditingController();
   TextEditingController controller2 = TextEditingController();
-  List<UploadTask> _uploadTasks = [];
+  String downloadUrl = '';
+  String imageUploadButton = 'Select image (optional)';
 
   Future pickImage() async {
     final returnedImage =
@@ -28,11 +31,21 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
 
     setState(() {
       _selectedImage = File(returnedImage!.path);
+      uploadFile(_selectedImage).then(
+        (value) => {
+          setState(() {
+            imageUploadButton = 'Upload complete ! you can now submit';
+          }),
+          print(value),
+          downloadUrl = value!,
+        },
+      );
     });
   }
 
   /// The user selects a file, and the task is added to the list.
-  Future<UploadTask?> uploadFile(File? file) async {
+  Future<String?> uploadFile(File? file) async {
+    String returnVal = '';
     if (file == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -43,26 +56,22 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
       return null;
     }
 
-    UploadTask uploadTask;
-
     // Create a Reference to the file
-    Reference ref = FirebaseStorage.instance
-        .ref()
-        .child('flutter-tests')
-        .child('/some-image.jpg');
+    Reference ref = FirebaseStorage.instance.ref().child('uploads').child(
+        '/${widget.houseId}_${selectedDate}.jpg'); // combine house id and date
 
     final metadata = SettableMetadata(
       contentType: 'image/jpeg',
       customMetadata: {'picked-file-path': file.path},
     );
 
-    // if (kIsWeb) {
-    //   uploadTask = ref.putData(await file.readAsBytes(), metadata);
-    // } else {
-    //   uploadTask = ref.putFile(io.File(file.path), metadata);
-    // }
-    uploadTask = ref.putFile(io.File(file.path), metadata);
-    return Future.value(uploadTask);
+    print('/${widget.houseId}_${selectedDate}.jpg');
+    await ref.putFile(io.File(file.path), metadata).then(
+      (p0) async {
+        await p0.ref.getDownloadURL().then((value) => {returnVal = value});
+      },
+    );
+    return returnVal;
   }
 
   String? _validateField(String? value) {
@@ -140,62 +149,38 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          // push image first
-                          // Create a Reference to the file
-                          String downloadUrl = '';
-                          Reference ref = FirebaseStorage.instance
-                              .ref()
-                              .child('flutter-tests')
-                              .child('/some-image.jpg');
-                          uploadFile(_selectedImage).then((uploadTask) => {
-                                uploadTask!.snapshot.ref
-                                    .getDownloadURL()
-                                    .then((value) => {
-                                          setState(
-                                            () {
-                                              print(value);
-                                              downloadUrl = value;
-                                            },
-                                          )
-                                        })
-                              });
-                          print('object');
-                          print(downloadUrl);
-                          final metadata = SettableMetadata(
-                            contentType: 'image/jpeg',
-                            customMetadata: {
-                              'picked-file-path': _selectedImage.path
-                            },
-                          );
-
-                          print('valid');
-                          // try push to firebase
-                          // final docTodo = await FirebaseFirestore.instance
-                          //     .collection('houseLogs')
-                          //     .doc(widget.houseId);
-                          // print(docTodo);
-                          // docTodo
-                          //     .set({
-                          //       "notes": controller1.text,
-                          //       "total": controller2.text,
-                          //       "date": selectedDate
-                          //     })
-                          //     .onError(
-                          //         (e, _) => print("Error writing document: $e"))
-                          //     .then((value) => print('complete'));
-                        }
+                        setState(() {
+                          imageUploadButton = 'Uploading . please wait..';
+                        });
+                        pickImage();
                       },
-                      child: const Text('Submit'),
+                      child: Text(imageUploadButton),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
                       onPressed: () async {
-                        pickImage();
+                        if (_formKey.currentState!.validate()) {
+                          // try push to firebase
+                          final docTodo = await FirebaseFirestore.instance
+                              .collection('houseLogs')
+                              .doc(widget.houseId);
+
+                          docTodo
+                              .set({
+                                "notes": controller1.text,
+                                "total": controller2.text,
+                                "date": selectedDate,
+                                "houseId": widget.houseId,
+                                "filename": downloadUrl
+                              })
+                              .onError(
+                                  (e, _) => print("Error writing document: $e"))
+                              .then((value) => Navigator.of(context).pop());
+                        }
                       },
-                      child: const Text('Select Image'),
+                      child: const Text('Submit'),
                     ),
                   ),
                 ],
