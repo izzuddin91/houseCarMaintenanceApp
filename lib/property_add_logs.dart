@@ -36,7 +36,6 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
           setState(() {
             imageUploadButton = 'Upload complete ! you can now submit';
           }),
-          print(value),
           downloadUrl = value!,
         },
       );
@@ -65,7 +64,6 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
       customMetadata: {'picked-file-path': file.path},
     );
 
-    print('/${widget.houseId}_${selectedDate}.jpg');
     await ref.putFile(io.File(file.path), metadata).then(
       (p0) async {
         await p0.ref.getDownloadURL().then((value) => {returnVal = value});
@@ -99,7 +97,6 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                     minDate: DateTime(2023, 10, 10),
                     maxDate: DateTime(2024, 12, 31),
                     onDateSelected: (val) {
-                      // print('selected date is ${val}');
                       selectedDate = val;
                     },
                   ),

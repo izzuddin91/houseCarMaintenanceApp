@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:iz_properties/bloc/house_log_bloc.dart';
 import 'package:iz_properties/dashboard.dart';
 
 import 'bloc/counter_bloc.dart';
 
 /// Flutter code sample for [ElevatedButton].
-// FirebaseAuth auth = FirebaseAuth.instance;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -16,9 +17,13 @@ void main() async {
       BlocProvider<CounterBloc>(
         create: (context) => CounterBloc(),
       ),
+      BlocProvider<HouseLogBloc>(
+        create: (context) => HouseLogBloc(),
+      ),
     ],
     child: MaterialApp(
       home: const LoginPage(),
+      builder: EasyLoading.init(),
     ),
   ));
 }
@@ -41,20 +46,14 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final VoidCallback? onPressed = enabled
         ? () async {
-            print('object');
-            print(usernameController.text);
-            print(passwordController.text);
-
             try {
-              print('inside');
               final credential =
                   await FirebaseAuth.instance.signInWithEmailAndPassword(
                 email: usernameController.text,
                 password: passwordController.text,
               );
-              print(credential.additionalUserInfo);
+
               if (FirebaseAuth.instance.currentUser != null) {
-                print(FirebaseAuth.instance.currentUser?.uid);
                 // user can login into the dashboard
                 Navigator.push(
                     context,
@@ -62,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
                         builder: ((context) => const DashboardPage())));
               }
             } on FirebaseAuthException catch (e) {
-              print(e);
               if (e.code == 'user-not-found') {
                 print('No user found for that email.');
               } else if (e.code == 'wrong-password') {

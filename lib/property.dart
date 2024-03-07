@@ -3,12 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:iz_properties/property_add_logs.dart';
-
+import 'package:iz_properties/property_edit_logs.dart';
+import 'package:path_provider/path_provider.dart';
 import 'bloc/counter_bloc.dart';
-import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uri_to_file/uri_to_file.dart';
+import 'package:http/http.dart' show get;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'bloc/house_log_bloc.dart';
 
 const List<String> monthList = <String>[
   'January',
@@ -49,30 +52,26 @@ class PropertyPage extends StatefulWidget {
   State<StatefulWidget> createState() => _PropertyPageState();
 }
 
-// DropdownButton<String>(
-//   value: dropdownValue,
-//   icon: const Icon(Icons.arrow_downward),
-//   elevation: 16,
-//   style: const TextStyle(color: Colors.deepPurple),
-//   underline: Container(
-//     height: 2,
-//     color: Colors.deepPurpleAccent,
-//   ),
-//   onChanged: (String? value) {
-//     // This is called when the user selects an item.
-//     setState(() {
-//       dropdownValue = value!;
-//     });
-//   },
-//   items: list.map<DropdownMenuItem<String>>((String value) {
-//     return DropdownMenuItem<String>(
-//       value: value,
-//       child: Text(value),
-//     );
-//   }).toList(),
-// )
-
 class _PropertyPageState extends State<PropertyPage> {
+  Future<File> file(String url) async {
+    File file2 = new File('');
+    try {
+      String uriString = url; // Uri string
+
+      // Don't pass uri parameter using [Uri] object via uri.toString().
+      // Because uri.toString() changes the string to lowercase which causes this package to misbehave
+
+      // If you are using uni_links package for deep linking purpose.
+      // Pass the uri string using getInitialLink() or linkStream
+
+      File file = await toFile(uriString); // Converting uri to file
+      file2 = file;
+    } catch (e) {
+      print(e); // Exception
+    }
+    return file2;
+  }
+
   Future<void> _showMyDialog(
       BuildContext context, CounterState state, CounterBloc counterBloc) async {
     String dropdownValue = monthList[state.month - 1 < 0
@@ -169,7 +168,6 @@ class _PropertyPageState extends State<PropertyPage> {
 
     return BlocBuilder<CounterBloc, CounterState>(
       builder: (context, state) {
-        print(state.month);
         var lessThanDate = '';
         var greaterThanDate = '';
 
@@ -183,11 +181,6 @@ class _PropertyPageState extends State<PropertyPage> {
               '${(state.year)}-${((state.month + 1) < 10 ? '0${state.month + 1}' : state.month + 1)}-01';
         }
 
-        print('xx');
-        print(state.month);
-
-        print(greaterThanDate);
-        print(lessThanDate);
         return Scaffold(
           appBar: AppBar(
             title: Text('House Logs'),
@@ -238,7 +231,51 @@ class _PropertyPageState extends State<PropertyPage> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: () async {
+                                    // convert image to file here
+                                    EasyLoading.show(status: 'loading...');
+                                    var response = await get(
+                                        Uri.parse(client['filename'])); // <--2
+                                    var documentDirectory =
+                                        await getApplicationDocumentsDirectory();
+                                    var firstPath =
+                                        documentDirectory.path + "/images";
+                                    var filePathAndName =
+                                        documentDirectory.path +
+                                            '/images/pic.jpg';
+
+                                    await Directory(firstPath)
+                                        .create(recursive: true); // <-- 1
+                                    File file2 =
+                                        new File(filePathAndName); // <-- 2
+                                    file2.writeAsBytesSync(
+                                        response.bodyBytes); // <--
+
+                                    final HouseLogBloc houseLogBloc =
+                                        BlocProvider.of<HouseLogBloc>(context);
+                                    houseLogBloc.add(AddHouseLog(
+                                        dateTime: client['date'].toDate(),
+                                        description: client['notes'],
+                                        amount: double.parse(
+                                            client['total'].toString()),
+                                        houseId: widget.houseId,
+                                        imageFile: file2));
+                                    EasyLoading.dismiss();
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: ((context) =>
+                                                PropertyEditLogs(
+                                                  houseId: widget.houseId,
+                                                  amount: double.parse(
+                                                      client['total']
+                                                          .toString()),
+                                                  dateTime:
+                                                      client['date'].toDate(),
+                                                  description: client['notes'],
+                                                  imageFile: file2,
+                                                ))));
+                                  },
                                   child: Container(
                                     margin: const EdgeInsets.all(10.0),
                                     padding: const EdgeInsets.all(10.0),
