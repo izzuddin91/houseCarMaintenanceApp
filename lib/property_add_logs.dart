@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -30,10 +31,12 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
         await ImagePicker().pickImage(source: ImageSource.gallery);
 
     setState(() {
+      EasyLoading.show(status: 'loading...');
       _selectedImage = File(returnedImage!.path);
       uploadFile(_selectedImage).then(
         (value) => {
           setState(() {
+            EasyLoading.dismiss();
             imageUploadButton = 'Upload complete ! you can now submit';
           }),
           downloadUrl = value!,
@@ -145,6 +148,10 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.fromHeight(
+                            40), // fromHeight use double.infinity as width and 40 is the height
+                      ),
                       onPressed: () async {
                         setState(() {
                           imageUploadButton = 'Uploading . please wait..';
@@ -157,12 +164,16 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.fromHeight(
+                            40), // fromHeight use double.infinity as width and 40 is the height
+                      ),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           // try push to firebase
                           final docTodo = await FirebaseFirestore.instance
                               .collection('houseLogs')
-                              .doc(widget.houseId);
+                              .doc();
 
                           docTodo
                               .set({

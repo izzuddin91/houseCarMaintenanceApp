@@ -211,17 +211,22 @@ class _PropertyPageState extends State<PropertyPage> {
               children: [
                 SizedBox(height: 50),
                 StreamBuilder<QuerySnapshot>(
+                    // for example, user want to search 1st january until end of month
+                    // we will miss 1st january, because it's greater than 1st jan
+                    // so need to use this isGreaterThanOrEqualTo
                     stream: FirebaseFirestore.instance
                         .collection('houseLogs')
                         .where("houseId", isEqualTo: widget.houseId)
                         .where("date",
-                            isGreaterThan: DateTime.parse(greaterThanDate))
+                            isGreaterThanOrEqualTo:
+                                DateTime.parse(greaterThanDate))
                         .where("date", isLessThan: DateTime.parse(lessThanDate))
                         .snapshots(),
                     builder: (context, snapshot) {
                       List<Row> clientWidgets = [];
                       if (snapshot.hasData) {
                         final clients = snapshot.data?.docs.reversed.toList();
+
                         for (var client in clients!) {
                           final DateFormat formatter = DateFormat('MMMM dd');
                           final String formatted =
@@ -232,10 +237,16 @@ class _PropertyPageState extends State<PropertyPage> {
                               Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
+                                    // print(client.data().doc);
                                     // convert image to file here
                                     EasyLoading.show(status: 'loading...');
-                                    var response = await get(
-                                        Uri.parse(client['filename'])); // <--2
+                                    print('at home page');
+                                    print(client.id);
+                                    var response = await get(Uri.parse(client[
+                                                'filename'] ==
+                                            ''
+                                        ? 'https://firebasestorage.googleapis.com/v0/b/housecarmaintenance.appspot.com/o/uploads%2Fwhite_screen.png?alt=media&token=5c686145-9311-4376-95c9-a56b07d93d2a'
+                                        : client['filename'])); // <--2
                                     var documentDirectory =
                                         await getApplicationDocumentsDirectory();
                                     var firstPath =
@@ -258,7 +269,7 @@ class _PropertyPageState extends State<PropertyPage> {
                                         description: client['notes'],
                                         amount: double.parse(
                                             client['total'].toString()),
-                                        houseId: widget.houseId,
+                                        houseId: client.id,
                                         imageFile: file2));
                                     EasyLoading.dismiss();
                                     Navigator.push(

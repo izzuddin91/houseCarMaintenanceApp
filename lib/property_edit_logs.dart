@@ -101,7 +101,7 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
         // _selectedImage = state.imageFile;
         return Scaffold(
             appBar: AppBar(
-              title: Text('Add House Logs'),
+              title: Text('Edit House Logs'),
             ),
             body: SingleChildScrollView(
               child: Padding(
@@ -168,27 +168,35 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
                       Image.memory(
                         state.imageFile.readAsBytesSync(),
                       ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(vertical: 16),
+                      //   child: ElevatedButton(
+                      //     style: ElevatedButton.styleFrom(
+                      //       minimumSize: Size.fromHeight(
+                      //           40), // fromHeight use double.infinity as width and 40 is the height
+                      //     ),
+                      //     onPressed: () async {
+                      //       setState(() {
+                      //         imageUploadButton = 'Uploading . please wait..';
+                      //       });
+                      //       pickImage(houseLogBloc);
+                      //     },
+                      //     child: Text(imageUploadButton),
+                      //   ),
+                      // ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              imageUploadButton = 'Uploading . please wait..';
-                            });
-                            pickImage(houseLogBloc);
-                          },
-                          child: Text(imageUploadButton),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size.fromHeight(
+                                40), // fromHeight use double.infinity as width and 40 is the height
+                          ),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               // try push to firebase
                               final docTodo = await FirebaseFirestore.instance
                                   .collection('houseLogs')
-                                  .doc(widget.houseId);
+                                  .doc(state.houseId.toString());
 
                               docTodo
                                   .update({
@@ -196,7 +204,7 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
                                     "total": controller2.text,
                                     "date": selectedDate,
                                     "houseId": widget.houseId,
-                                    "filename": downloadUrl
+                                    // "filename": downloadUrl
                                   })
                                   .onError((e, _) =>
                                       print("Error writing document: $e"))

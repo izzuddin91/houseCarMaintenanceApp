@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:iz_properties/bloc/house_log_bloc.dart';
 import 'package:iz_properties/dashboard.dart';
-
 import 'bloc/counter_bloc.dart';
 
 /// Flutter code sample for [ElevatedButton].
@@ -102,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                           backgroundColor:
                               MaterialStateProperty.all<Color>(Colors.black)),
                       onPressed: onPressed,
-                      child: const Text('Filled')),
+                      child: const Text('Enter')),
                 ],
               )),
         ),
