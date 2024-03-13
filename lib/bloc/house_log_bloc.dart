@@ -14,6 +14,8 @@ class HouseLogBloc extends Bloc<HouseLogEvent, HouseLogState> {
             dateTime: new DateTime.now(),
             description: '',
             houseId: '',
+            imageLink: '',
+            id: '',
             imageFile: new File(''))) {
     on<AddHouseLog>((event, emit) {
       emit(HouseLogState(
@@ -21,17 +23,22 @@ class HouseLogBloc extends Bloc<HouseLogEvent, HouseLogState> {
           dateTime: event.dateTime,
           description: event.description,
           houseId: event.houseId,
+          id: event.id,
+          imageLink: event.imageLink,
           imageFile: event.imageFile));
       // TODO: implement event handler
     });
 
     on<UpdateHouseLogImage>((event, emit) {
+      print('update image');
       emit(HouseLogState(
           amount: state.amount,
           dateTime: state.dateTime,
           description: state.description,
           houseId: state.houseId,
-          imageFile: event.imageFile));
+          id: state.id,
+          imageFile: event.imageFile,
+          imageLink: event.imageLink));
       // TODO: implement event handler
     });
   }

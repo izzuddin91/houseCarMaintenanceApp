@@ -10,21 +10,14 @@ import 'package:gif_view/gif_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:iz_properties/bloc/house_log_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' show get;
 
 class PropertyEditLogs extends StatefulWidget {
   const PropertyEditLogs({
     super.key,
-    required this.houseId,
-    required this.dateTime,
-    required this.description,
-    required this.amount,
-    required this.imageFile,
   });
-  final DateTime dateTime;
-  final String description;
-  final double amount;
-  final String houseId;
-  final File imageFile;
+
   @override
   State<StatefulWidget> createState() => _PropertyEditLogsState();
 }
@@ -39,13 +32,26 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
   String downloadUrl = '';
   String imageUploadButton = 'Select image (optional)';
 
-  Future pickImage(HouseLogBloc houseLogBloc) async {
+  Future<File> createFileImage(String imageLink) async {
+    var response = await get(Uri.parse(imageLink)); // <--2
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    var firstPath = documentDirectory.path + "/images";
+    var filePathAndName = documentDirectory.path + '/images/pic.jpg';
+
+    await Directory(firstPath).create(recursive: true); // <-- 1
+    File file2 = new File(filePathAndName); // <-- 2
+    file2.writeAsBytesSync(response.bodyBytes); // <--
+    return file2;
+  }
+
+  Future pickImage(HouseLogBloc houseLogBloc, HouseLogState state) async {
     final returnedImage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-    houseLogBloc.add(UpdateHouseLogImage(imageFile: File(returnedImage!.path)));
+    houseLogBloc.add(UpdateHouseLogImage(
+        imageLink: state.imageLink, imageFile: File(returnedImage!.path)));
     setState(() {
       _selectedImage = File(returnedImage!.path);
-      uploadFile(_selectedImage).then(
+      uploadFile(_selectedImage, state).then(
         (value) => {
           setState(() {
             imageUploadButton = 'Upload complete ! you can now submit';
@@ -57,7 +63,7 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
   }
 
   /// The user selects a file, and the task is added to the list.
-  Future<String?> uploadFile(File? file) async {
+  Future<String?> uploadFile(File? file, HouseLogState state) async {
     String returnVal = '';
     if (file == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +77,7 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
 
     // Create a Reference to the file
     Reference ref = FirebaseStorage.instance.ref().child('uploads').child(
-        '/${widget.houseId}_${selectedDate}.jpg'); // combine house id and date
+        '/${state.houseId}_${selectedDate}.jpg'); // combine house id and date
 
     final metadata = SettableMetadata(
       contentType: 'image/jpeg',
@@ -98,7 +104,13 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
       builder: (context, state) {
         controller1.text = state.description;
         controller2.text = state.amount.toString();
-        // _selectedImage = state.imageFile;
+        if (state.imageLink != '')
+          createFileImage(state.imageLink).then((value) => {
+                // state.imageFile = value
+                print(value),
+                houseLogBloc.add(UpdateHouseLogImage(
+                    imageFile: value, imageLink: state.imageLink))
+              });
         return Scaffold(
             appBar: AppBar(
               title: Text('Edit House Logs'),
@@ -165,9 +177,10 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
                         height: 20,
                       ),
                       // Image.file(state.imageFile),
-                      Image.memory(
-                        state.imageFile.readAsBytesSync(),
-                      ),
+                      if (state.imageLink != '')
+                        Image.memory(
+                          state.imageFile.readAsBytesSync(),
+                        ),
                       // Padding(
                       //   padding: const EdgeInsets.symmetric(vertical: 16),
                       //   child: ElevatedButton(
@@ -196,14 +209,14 @@ class _PropertyEditLogsState extends State<PropertyEditLogs> {
                               // try push to firebase
                               final docTodo = await FirebaseFirestore.instance
                                   .collection('houseLogs')
-                                  .doc(state.houseId.toString());
+                                  .doc(state.id.toString());
 
                               docTodo
                                   .update({
                                     "notes": controller1.text,
                                     "total": controller2.text,
                                     "date": selectedDate,
-                                    "houseId": widget.houseId,
+                                    "houseId": state.houseId,
                                     // "filename": downloadUrl
                                   })
                                   .onError((e, _) =>

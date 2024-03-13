@@ -13,15 +13,20 @@ class AddHouseLog extends HouseLogEvent {
   final double amount;
   final String houseId;
   final File imageFile;
+  final String imageLink;
+  final String id;
   const AddHouseLog(
       {required this.dateTime,
       required this.description,
       required this.amount,
       required this.houseId,
-      required this.imageFile});
+      required this.imageFile,
+      required this.imageLink,
+      required this.id});
 }
 
 class UpdateHouseLogImage extends HouseLogEvent {
   final File imageFile;
-  const UpdateHouseLogImage({required this.imageFile});
+  final String imageLink;
+  const UpdateHouseLogImage({required this.imageFile, required this.imageLink});
 }
