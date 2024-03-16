@@ -30,3 +30,8 @@ class UpdateHouseLogImage extends HouseLogEvent {
   final String imageLink;
   const UpdateHouseLogImage({required this.imageFile, required this.imageLink});
 }
+
+class UpdateLogType extends HouseLogEvent {
+  final List<bool> logType;
+  const UpdateLogType({required this.logType});
+}

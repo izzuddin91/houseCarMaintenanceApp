@@ -53,25 +53,6 @@ class PropertyPage extends StatefulWidget {
 }
 
 class _PropertyPageState extends State<PropertyPage> {
-  // Future<File> file(String url) async {
-  //   File file2 = new File('');
-  //   try {
-  //     String uriString = url; // Uri string
-
-  //     // Don't pass uri parameter using [Uri] object via uri.toString().
-  //     // Because uri.toString() changes the string to lowercase which causes this package to misbehave
-
-  //     // If you are using uni_links package for deep linking purpose.
-  //     // Pass the uri string using getInitialLink() or linkStream
-
-  //     File file = await toFile(uriString); // Converting uri to file
-  //     file2 = file;
-  //   } catch (e) {
-  //     print(e); // Exception
-  //   }
-  //   return file2;
-  // }
-
   Future<void> _showMyDialog(
       BuildContext context, CounterState state, CounterBloc counterBloc) async {
     String dropdownValue = monthList[state.month - 1 < 0
@@ -224,10 +205,15 @@ class _PropertyPageState extends State<PropertyPage> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       List<Row> clientWidgets = [];
+                      double amount = 0.0;
                       if (snapshot.hasData) {
                         final clients = snapshot.data?.docs.reversed.toList();
 
                         for (var client in clients!) {
+                          amount += double.parse(client['total']);
+
+                          counterBloc.add(
+                              UpdateAccumulatedTotal(accumulatedTotal: amount));
                           final DateFormat formatter = DateFormat('MMMM dd');
                           final String formatted =
                               formatter.format(client['date'].toDate());
@@ -318,6 +304,26 @@ class _PropertyPageState extends State<PropertyPage> {
                     })
               ],
             ),
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Colors.blue,
+            child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: ListTile(
+                  titleTextStyle: TextStyle(fontSize: 20),
+                  leadingAndTrailingTextStyle: TextStyle(fontSize: 20),
+                  textColor: Colors.white,
+                  // leading: Text(''),
+                  title: Text('Total'),
+                  trailing: Text('RM${state.accumulatedTotal}'),
+                )
+                // Text(
+                //   'bottom screen widget',
+                //   style: TextStyle(fontSize: 15, color: Colors.white),
+                // ),
+                ),
+            elevation: 20,
+            height: 50,
           ),
         );
       },

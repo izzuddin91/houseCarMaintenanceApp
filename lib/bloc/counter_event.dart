@@ -21,6 +21,12 @@ class UpdateMonthEvent extends CounterEvent {
   const UpdateMonthEvent({required this.month});
 }
 
+class UpdateAccumulatedTotal extends CounterEvent {
+  final double accumulatedTotal;
+
+  const UpdateAccumulatedTotal({required this.accumulatedTotal});
+}
+
 class UpdateGreaterThanDateString extends CounterEvent {
   final String value;
 

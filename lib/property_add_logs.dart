@@ -27,6 +27,18 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
   TextEditingController controller2 = TextEditingController();
   String downloadUrl = '';
   String imageUploadButton = 'Select image (optional)';
+  List<Widget> fruits = <Widget>[
+    Row(children: <Widget>[
+      Icon(Icons.arrow_forward, size: 16.0, color: Colors.green),
+      SizedBox(width: 6.0),
+      Text('Revenue', style: TextStyle(color: Colors.green))
+    ]),
+    Row(children: <Widget>[
+      Icon(Icons.arrow_back, size: 16.0, color: Colors.red[800]),
+      SizedBox(width: 6.0),
+      Text('Expenses', style: TextStyle(color: Colors.red[800]))
+    ]),
+  ];
 
   Future pickImage(HouseLogBloc bloc) async {
     final returnedImage =
@@ -80,6 +92,8 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
   @override
   Widget build(BuildContext context) {
     final HouseLogBloc houseLogBloc = BlocProvider.of<HouseLogBloc>(context);
+    bool vertical = false;
+
     return BlocBuilder<HouseLogBloc, HouseLogState>(
       builder: (context, state) {
         return Scaffold(
@@ -95,6 +109,38 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Log Type',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      ToggleButtons(
+                        direction: vertical ? Axis.vertical : Axis.horizontal,
+                        onPressed: (int index) async {
+                          List<bool> _selectedType = state.logType;
+                          for (int i = 0; i < _selectedType.length; i++) {
+                            _selectedType[i] = i == index;
+                          }
+                          setState(() {
+                            houseLogBloc
+                                .add(UpdateLogType(logType: _selectedType));
+                          });
+                        },
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        selectedBorderColor: Colors.blue[700],
+                        selectedColor: Colors.white,
+                        fillColor: Colors.blue[200],
+                        color: Colors.blue[400],
+                        constraints: BoxConstraints(
+                            minHeight: 30,
+                            minWidth:
+                                (MediaQuery.of(context).size.width - 36) / 2),
+                        isSelected: state.logType,
+                        children: fruits,
+                      ),
                       DatePicker(
                         splashRadius: 10,
                         centerLeadingDate: true,
@@ -145,7 +191,7 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                       SizedBox(
                         height: 20,
                       ),
-                      Image.file(state.imageFile),
+                      if (state.imageLink != '') Image.file(state.imageFile),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
@@ -179,7 +225,9 @@ class _PropertyAddLogsState extends State<PropertyAddLogs> {
                                     "total": controller2.text,
                                     "date": selectedDate,
                                     "houseId": widget.houseId,
-                                    "filename": state.imageLink
+                                    "filename": state.imageLink,
+                                    "isRevenue": state.logType[0],
+                                    "isExpenses": state.logType[1]
                                   })
                                   .onError((e, _) =>
                                       print("Error writing document: $e"))

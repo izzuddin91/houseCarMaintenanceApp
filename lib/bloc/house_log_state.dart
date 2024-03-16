@@ -8,15 +8,18 @@ class HouseLogState extends Equatable {
   final String id;
   final File imageFile;
   final String imageLink;
-  const HouseLogState(
-      {required this.dateTime,
-      required this.description,
-      required this.amount,
-      required this.houseId,
-      required this.id,
-      required this.imageFile,
-      required this.imageLink});
+  final List<bool> logType;
+  const HouseLogState({
+    required this.dateTime,
+    required this.description,
+    required this.amount,
+    required this.houseId,
+    required this.id,
+    required this.imageFile,
+    required this.imageLink,
+    required this.logType,
+  });
 
   @override
-  List<Object> get props => [dateTime, description, amount];
+  List<Object> get props => [dateTime, description, amount, logType];
 }

@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iz_properties/property.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final String user_id;
+  const DashboardPage({super.key, required this.user_id});
 
   @override
   State<StatefulWidget> createState() => _DashboardPageState();
@@ -26,8 +27,10 @@ class _DashboardPageState extends State<DashboardPage> {
               style: TextStyle(fontSize: 25),
             ),
             StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance.collection('houses').snapshots(),
+                stream: FirebaseFirestore.instance
+                    .collection('houses')
+                    .where('user_id', isEqualTo: widget.user_id)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   List<Row> clientWidgets = [];
                   if (snapshot.hasData) {

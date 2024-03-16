@@ -54,10 +54,13 @@ class _LoginPageState extends State<LoginPage> {
 
               if (FirebaseAuth.instance.currentUser != null) {
                 // user can login into the dashboard
+                print(FirebaseAuth.instance.currentUser!.uid);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: ((context) => const DashboardPage())));
+                        builder: ((context) => DashboardPage(
+                              user_id: FirebaseAuth.instance.currentUser!.uid,
+                            ))));
               }
             } on FirebaseAuthException catch (e) {
               if (e.code == 'user-not-found') {
